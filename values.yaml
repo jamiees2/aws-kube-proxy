@@ -1,0 +1,112 @@
+nameOverride: kube-proxy
+
+fullnameOverride: "kube-proxy"
+
+image:
+  tag: v1.27.1-minimal-eksbuild.1
+  domain: amazonaws.com
+  region: us-east-1
+  endpoint: ecr
+  account: "602401143452"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# this flag enables you to use the match label that was present in the original daemonset deployed by EKS
+# You can then annotate and label the original kube-proxy resources and 'adopt' them into a helm release
+originalMatchLabels: false
+
+env: {}
+
+priorityClassName: system-node-critical
+
+podSecurityContext: {}
+
+podAnnotations: {}
+
+podLabels: {}
+
+extraVolumes: []
+
+extraVolumeMounts: []
+
+securityContext:
+  privileged: true
+
+serviceAccount:
+  create: true
+  name:
+  clusterRoleBindingName:
+  annotations: {}
+  
+resources:
+  requests:
+    cpu: 100m
+
+updateStrategy:
+  rollingUpdate:
+    maxSurge: 0
+    maxUnavailable: 10%
+  type: RollingUpdate
+
+nodeSelector: {}
+
+tolerations:
+  - operator: Exists
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/os
+          operator: In
+          values:
+          - linux
+        - key: kubernetes.io/arch
+          operator: In
+          values:
+          - amd64
+          - arm64
+        - key: eks.amazonaws.com/compute-type
+          operator: NotIn
+          values:
+          - fargate
+
+clusterEndpoint: 
+kubeProxyConfiguration:
+  apiVersion: kubeproxy.config.k8s.io/v1alpha1
+  kind: KubeProxyConfiguration
+  bindAddress: 0.0.0.0
+  clientConnection:
+    acceptContentTypes: ""
+    burst: 10
+    contentType: application/vnd.kubernetes.protobuf
+    kubeconfig: /var/lib/kube-proxy/kubeconfig
+    qps: 5
+  clusterCIDR: ""
+  configSyncPeriod: 15m0s
+  conntrack:
+    maxPerCore: 32768
+    min: 131072
+    tcpCloseWaitTimeout: 1h0m0s
+    tcpEstablishedTimeout: 24h0m0s
+  enableProfiling: false
+  healthzBindAddress: 0.0.0.0:10256
+  hostnameOverride: ""
+  iptables:
+    masqueradeAll: false
+    masqueradeBit: 14
+    minSyncPeriod: 0s
+    syncPeriod: 30s
+  ipvs:
+    excludeCIDRs: null
+    minSyncPeriod: 0s
+    scheduler: ""
+    syncPeriod: 30s
+  metricsBindAddress: 0.0.0.0:10249
+  mode: "iptables"
+  nodePortAddresses: null
+  oomScoreAdj: -998
+  portRange: ""
+  udpIdleTimeout: 250ms

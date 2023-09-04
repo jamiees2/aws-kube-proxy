@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "kube-proxy.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "kube-proxy.labels" . | indent 4 }}
+spec:
+  updateStrategy:
+{{ toYaml .Values.updateStrategy | indent 4 }}
+  selector:
+    matchLabels:
+{{- if .Values.originalMatchLabels }}
+      k8s-app: kube-proxy
+{{- else }}
+      app.kubernetes.io/name: {{ include "kube-proxy.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 6 }}
+      {{- end }}
+{{- end }}
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      {{- if .Values.podAnnotations }}
+      annotations:
+      {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ include "kube-proxy.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        k8s-app: kube-proxy
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+      priorityClassName: "{{ .Values.priorityClassName }}"
+      serviceAccountName: {{ template "kube-proxy.serviceAccountName" . }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: 30
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: kube-proxy
+        command:
+        - kube-proxy
+        - --v=2
+        - --config=/var/lib/kube-proxy-config/config
+        - --hostname-override=$(NODE_NAME)
+        env:
+{{- range $key, $value := .Values.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+{{- end }}
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        image: {{ include "kube-proxy.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        volumeMounts:
+        - mountPath: /var/log
+          name: varlog
+        - mountPath: /run/xtables.lock
+          name: xtables-lock
+        - mountPath: /lib/modules
+          name: lib-modules
+          readOnly: true
+        - mountPath: /var/lib/kube-proxy/
+          name: kubeconfig
+        - mountPath: /var/lib/kube-proxy-config/
+          name: config
+        {{- with .Values.extraVolumeMounts  }}
+        {{- toYaml .| nindent 10 }}
+        {{- end }}
+      volumes:
+      - hostPath:
+          path: /var/log
+          type: ""
+        name: varlog
+      - hostPath:
+          path: /run/xtables.lock
+          type: FileOrCreate
+        name: xtables-lock
+      - hostPath:
+          path: /lib/modules
+          type: ""
+        name: lib-modules
+      - configMap:
+          defaultMode: 420
+          name: {{ include "kube-proxy.fullname" . }}
+        name: kubeconfig
+      - configMap:
+          defaultMode: 420
+          name: {{ include "kube-proxy.fullname" . }}-config
+        name: config
+      {{- with .Values.extraVolumes  }}
+      {{- toYaml .| nindent 6 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+
