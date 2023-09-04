@@ -12,13 +12,13 @@ This chart installs kube-proxy as it is configured by default on AWS
 First add the EKS repository to Helm:
 
 ```shell
-helm repo add jamiees2 https://aws.github.io/eks-charts
+helm repo add aws-kube-proxy https://jamiees2.github.io/aws-kube-proxy/
 ```
 
 To install the chart with the release name `aws-vpc-cni` and default configuration:
 
 ```shell
-$ helm install kube-proxy --namespace kube-system jamiees2/aws-kube-proxy
+$ helm install kube-proxy --namespace kube-system aws-kube-proxy/aws-kube-proxy
 ```
 
 To install into an EKS cluster where the CNI is already installed, see [this section below](#adopting-the-existing-kube-proxy-resources-in-an-eks-cluster)
@@ -64,7 +64,7 @@ The following table lists the configurable parameters for this chart and their d
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install` or provide a YAML file containing the values for the above parameters:
 
 ```shell
-$ helm install kube-proxy --namespace kube-system jamiees2/aws-kube-proxy --values values.yaml
+$ helm install kube-proxy --namespace kube-system aws-kube-proxy/aws-kube-proxy --values values.yaml
 ```
 
 ## Adopting the existing kube-proxy resources in an EKS cluster
