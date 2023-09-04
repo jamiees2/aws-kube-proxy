@@ -3,7 +3,7 @@ nameOverride: kube-proxy
 fullnameOverride: "kube-proxy"
 
 image:
-  tag: v1.27.1-minimal-eksbuild.1
+  tag: v1.27.4-minimal-eksbuild.1
   domain: amazonaws.com
   region: us-east-1
   endpoint: ecr
