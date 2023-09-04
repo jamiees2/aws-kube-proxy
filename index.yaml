@@ -1,0 +1,26 @@
+apiVersion: v1
+entries:
+  kube-proxy:
+  - apiVersion: v2
+    appVersion: 1.27.1
+    created: "2023-09-04T19:16:03.640248Z"
+    description: A Helm Chart to manage kube-proxy on AWS EKS clusters
+    digest: 6dcfe1a5b3015b795269f4c7db6e9c12c27d20813d43f73e344ad8309e80406c
+    home: https://github.com/jamiees2/aws-kube-proxy
+    icon: https://raw.githubusercontent.com/aws/eks-charts/master/docs/logo/aws.png
+    keywords:
+    - eks
+    - kube-proxy
+    - networking
+    maintainers:
+    - email: jamiees2@users.noreply.github.com
+      name: James Sigurdarson
+      url: https://github.com/jamiees2
+    name: kube-proxy
+    sources:
+    - https://github.com/jamiees2/aws-kube-proxy
+    type: application
+    urls:
+    - kube-proxy-1.27.1.tgz
+    version: 1.27.1
+generated: "2023-09-04T19:16:03.640258Z"
